@@ -70,6 +70,24 @@ LimitBlankPasswordUse = 0
 
 这是为了纯内网实验环境下简单直接地远程连接。
 
+### Windows 更新
+
+- 关闭 Windows 自动更新策略：
+
+```text
+NoAutoUpdate = 1
+```
+
+- 禁用 Windows Update 相关服务：
+  - `wuauserv`
+  - `UsoSvc`
+  - `WaaSMedicSvc`
+  - `DoSvc`
+
+这样安装完成后，系统不会自动扫描、下载和安装 Windows 更新，也不会通过 Delivery Optimization 下载或共享更新内容。
+
+如果后续需要手动打补丁，需要先恢复这些服务和更新策略。
+
 ### WSL2 与 Hyper-V
 
 安装后会启用：
@@ -174,6 +192,7 @@ Retail
 - Windows 防火墙已关闭。
 - WSL2 / VirtualMachinePlatform / Hyper-V Windows 功能已启用。
 - Edge 已保留。
+- Windows 自动更新已关闭。
 
 ## 安装后验证
 
@@ -185,6 +204,11 @@ winver
 (Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa').LimitBlankPasswordUse
 (Get-ItemProperty 'HKLM:\System\CurrentControlSet\Control\Terminal Server').fDenyTSConnections
 Get-NetFirewallProfile | Select-Object Name, Enabled
+(Get-ItemProperty 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU').NoAutoUpdate
+'wuauserv','UsoSvc','WaaSMedicSvc','DoSvc' | ForEach-Object {
+    $service = $_
+    Get-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Services\$service" | Select-Object @{Name='ServiceName';Expression={$service}}, Start
+}
 'Microsoft-Windows-Subsystem-Linux','VirtualMachinePlatform','Microsoft-Hyper-V-All' | ForEach-Object {
     Get-WindowsOptionalFeature -Online -FeatureName $_ | Select-Object FeatureName, State
 }
@@ -197,6 +221,8 @@ Get-NetFirewallProfile | Select-Object Name, Enabled
 - `LimitBlankPasswordUse` 为 `0`。
 - `fDenyTSConnections` 为 `0`。
 - 防火墙 profile 的 `Enabled` 均为 `False`。
+- `NoAutoUpdate` 为 `1`。
+- `wuauserv`、`UsoSvc`、`WaaSMedicSvc`、`DoSvc` 的 `Start` 均为 `4`。
 - WSL2 / VirtualMachinePlatform / Hyper-V 均为 `Enabled`。
 
 ## Docker Desktop
