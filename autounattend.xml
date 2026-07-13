@@ -184,11 +184,6 @@
           <Path>reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\OOBE" /v BypassNRO /t REG_DWORD /d 1 /f</Path>
         </RunSynchronousCommand>
         <RunSynchronousCommand wcm:action="add">
-          <Order>3</Order>
-          <Description>Installs OpenSSH Server while network access is available</Description>
-          <Path>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Add-WindowsCapability -Online -Name 'OpenSSH.Server~~~~0.0.1.0' -ErrorAction Stop"</Path>
-        </RunSynchronousCommand>
-        <RunSynchronousCommand wcm:action="add">
           <Order>4</Order>
           <Description>Disable All Network Adapters Temporarily so Windows Doesn't Update During OOBE and to Allow Local Account Creation</Description>
           <Path>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Get-NetAdapter | Disable-NetAdapter -Confirm:$false"</Path>
@@ -218,11 +213,6 @@
           <Path>reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\OOBE" /v BypassNRO /t REG_DWORD /d 1 /f</Path>
         </RunSynchronousCommand>
         <RunSynchronousCommand wcm:action="add">
-          <Order>3</Order>
-          <Description>Installs OpenSSH Server while network access is available</Description>
-          <Path>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Add-WindowsCapability -Online -Name 'OpenSSH.Server~~~~0.0.1.0' -ErrorAction Stop"</Path>
-        </RunSynchronousCommand>
-        <RunSynchronousCommand wcm:action="add">
           <Order>4</Order>
           <Description>Disable All Network Adapters Temporarily so Windows Doesn't Update During OOBE and to Allow Local Account Creation</Description>
           <Path>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Get-NetAdapter | Disable-NetAdapter -Confirm:$false"</Path>
@@ -250,11 +240,6 @@
           <Order>2</Order>
           <Description>Registry Entry to Create a Local Account during OOBE</Description>
           <Path>reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\OOBE" /v BypassNRO /t REG_DWORD /d 1 /f</Path>
-        </RunSynchronousCommand>
-        <RunSynchronousCommand wcm:action="add">
-          <Order>3</Order>
-          <Description>Installs OpenSSH Server while network access is available</Description>
-          <Path>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Add-WindowsCapability -Online -Name 'OpenSSH.Server~~~~0.0.1.0' -ErrorAction Stop"</Path>
         </RunSynchronousCommand>
         <RunSynchronousCommand wcm:action="add">
           <Order>4</Order>
@@ -298,6 +283,11 @@
         <Description>Enables Network Adapters After OOBE Completes</Description>
         <CommandLine>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Get-NetAdapter | Enable-NetAdapter -Confirm:$false"</CommandLine>
         </SynchronousCommand>
+        <SynchronousCommand>
+        <Order>2</Order>
+        <Description>Installs and Configures OpenSSH Server</Description>
+        <CommandLine>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Add-WindowsCapability -Online -Name 'OpenSSH.Server~~~~0.0.1.0' -ErrorAction Stop; Set-Service -Name sshd -StartupType Automatic; Start-Service -Name sshd; $p = Join-Path $env:ProgramData 'ssh\sshd_config'; $c = Get-Content -LiteralPath $p -Raw; $c = $c -replace '(?m)^#?\s*PermitEmptyPasswords\s+\S+\s*$', 'PermitEmptyPasswords yes'; if ($c -notmatch '(?m)^PermitEmptyPasswords yes$') { throw &quot;Failed to enable empty-password SSH authentication in $p&quot; }; Set-Content -LiteralPath $p -Value $c -Encoding Ascii; Restart-Service -Name sshd"</CommandLine>
+        </SynchronousCommand>
     </FirstLogonCommands>
     </component>
     <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="arm64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
@@ -314,6 +304,11 @@
         <Order>1</Order>
         <Description>Enables Network Adapters After OOBE Completes</Description>
         <CommandLine>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Get-NetAdapter | Enable-NetAdapter -Confirm:$false"</CommandLine>
+        </SynchronousCommand>
+        <SynchronousCommand>
+        <Order>2</Order>
+        <Description>Installs and Configures OpenSSH Server</Description>
+        <CommandLine>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Add-WindowsCapability -Online -Name 'OpenSSH.Server~~~~0.0.1.0' -ErrorAction Stop; Set-Service -Name sshd -StartupType Automatic; Start-Service -Name sshd; $p = Join-Path $env:ProgramData 'ssh\sshd_config'; $c = Get-Content -LiteralPath $p -Raw; $c = $c -replace '(?m)^#?\s*PermitEmptyPasswords\s+\S+\s*$', 'PermitEmptyPasswords yes'; if ($c -notmatch '(?m)^PermitEmptyPasswords yes$') { throw &quot;Failed to enable empty-password SSH authentication in $p&quot; }; Set-Content -LiteralPath $p -Value $c -Encoding Ascii; Restart-Service -Name sshd"</CommandLine>
         </SynchronousCommand>
     </FirstLogonCommands>
     </component>
@@ -348,6 +343,11 @@
         <Order>1</Order>
         <Description>Enables Network Adapters After OOBE Completes</Description>
         <CommandLine>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Get-NetAdapter | Enable-NetAdapter -Confirm:$false"</CommandLine>
+        </SynchronousCommand>
+        <SynchronousCommand>
+        <Order>2</Order>
+        <Description>Installs and Configures OpenSSH Server</Description>
+        <CommandLine>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Add-WindowsCapability -Online -Name 'OpenSSH.Server~~~~0.0.1.0' -ErrorAction Stop; Set-Service -Name sshd -StartupType Automatic; Start-Service -Name sshd; $p = Join-Path $env:ProgramData 'ssh\sshd_config'; $c = Get-Content -LiteralPath $p -Raw; $c = $c -replace '(?m)^#?\s*PermitEmptyPasswords\s+\S+\s*$', 'PermitEmptyPasswords yes'; if ($c -notmatch '(?m)^PermitEmptyPasswords yes$') { throw &quot;Failed to enable empty-password SSH authentication in $p&quot; }; Set-Content -LiteralPath $p -Value $c -Encoding Ascii; Restart-Service -Name sshd"</CommandLine>
         </SynchronousCommand>
     </FirstLogonCommands>
     </component>
@@ -2497,10 +2497,6 @@ Write-Host "Done. See $logFile for details."
     Set-RegistryValue -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\WSearch' -Name 'Start' -Type 'DWord' -Value 3 -Description 'Indexes files and folders for faster search results. Disabling reduces background CPU and disk activity but makes Windows Search slower'
     Set-RegistryValue -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Spooler' -Name 'Start' -Type 'DWord' -Value 3 -Description 'Manages print jobs sent to printers. If you don''t use a printer, set to Manual or Disabled to free up system resources'
     Set-RegistryValue -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\DiagTrack' -Name 'Start' -Type 'DWord' -Value 3 -Description 'Sends usage data and diagnostics to Microsoft. Setting to Manual or Disabled reduces background network and CPU usage'
-    Set-RegistryValue -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\wuauserv' -Name 'Start' -Type 'DWord' -Value 4 -Description 'Disables the Windows Update service to prevent automatic update scans, downloads, and installs'
-    Set-RegistryValue -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\UsoSvc' -Name 'Start' -Type 'DWord' -Value 4 -Description 'Disables Update Orchestrator Service, which coordinates Windows Update scans, downloads, installs, and restarts'
-    Set-RegistryValue -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\WaaSMedicSvc' -Name 'Start' -Type 'DWord' -Value 4 -Description 'Disables Windows Update Medic Service, which can repair and re-enable Windows Update components'
-    Set-RegistryValue -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\DoSvc' -Name 'Start' -Type 'DWord' -Value 4 -Description 'Disables Delivery Optimization, which downloads and shares Windows Update and Microsoft Store update content'
     Set-RegistryValue -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\PcaSvc' -Name 'Start' -Type 'DWord' -Value 3 -Description 'Monitors programs for compatibility issues and suggests fixes. Disabling prevents compatibility prompts and saves minor system resources'
     Set-RegistryValue -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\WerSvc' -Name 'Start' -Type 'DWord' -Value 3 -Description 'Collects and sends crash data to Microsoft. Disabling prevents crash reporting, reduces network traffic, and improves privacy with minimal system impact'
     Set-RegistryValue -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\lfsvc' -Name 'Start' -Type 'DWord' -Value 3 -Description 'Tracks your physical location for apps and services. Disabling improves privacy and prevents location tracking, but apps won''t be able to use location features'
@@ -2590,7 +2586,7 @@ Write-Host "Done. See $logFile for details."
     Set-RegistryValue -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance' -Name 'MaintenanceDisabled' -Type 'DWord' -Value 1 -Description 'Choose if Windows should run automatic system maintenance tasks during idle time'
     Set-RegistryValue -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting' -Name 'Disabled' -Type 'DWord' -Value 1 -Description 'Choose if Windows should collect and send crash reports and error information to Microsoft'
     Set-RegistryValue -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance' -Name 'fAllowToGetHelp' -Type 'DWord' -Value 0 -Description 'Choose if other people can connect to your computer remotely to provide technical support'
-    Set-RegistryValue -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name 'DisableLockWorkstation' -Type 'DWord' -Value 1 -Description 'Allows users to lock their computer using Windows+L, Start menu, or Ctrl+Alt+Del screen'
+    Set-RegistryValue -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name 'DisableLockWorkstation' -Type 'DWord' -Value 0 -Description 'Allows users to lock their computer using Windows+L, Start menu, or Ctrl+Alt+Del screen'
     Set-RegistryValue -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo' -Name 'DisabledByGroupPolicy' -Type 'DWord' -Value 1 -Description 'Windows generates a unique advertising ID that apps use to track your activity and deliver personalized ads based on your behavior across different apps'
     Remove-RegistryValue -Path 'HKLM:\SOFTWARE\Policies\Microsoft\InputPersonalization' -Name 'AllowInputPersonalization' -Description 'Use your voice for apps using Microsoft''s online speech recognition technology'
     Set-RegistryValue -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection' -Name 'AllowTelemetry' -Type 'DWord' -Value 0 -Description 'Send diagnostic data to Microsoft to help improve Windows and keep it secure'
@@ -2623,7 +2619,6 @@ Write-Host "Done. See $logFile for details."
     # ============================================================================
 
     Set-RegistryValue -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization' -Name 'DODownloadMode' -Type 'DWord' -Value 99 -Description 'Share downloaded updates with other PCs on your network or the internet to reduce bandwidth usage'
-    Set-RegistryValue -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' -Name 'NoAutoUpdate' -Type 'DWord' -Value 1 -Description 'Turn off automatic Windows Update scans, downloads, and installs'
     Set-RegistryValue -Path 'HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings' -Name 'IsContinuousInnovationOptedIn' -Type 'DWord' -Value 0 -Description 'Be among the first to get the latest non-security updates, fixes, and improvements as they roll out'
     Set-RegistryValue -Path 'HKLM:\Software\Microsoft\WindowsUpdate\UX\Settings' -Name 'AllowMUUpdateService' -Type 'DWord' -Value 0 -Description 'Get Microsoft Office and other updates together with Windows updates'
     Set-RegistryValue -Path 'HKLM:\Software\Microsoft\WindowsUpdate\UX\Settings' -Name 'IsExpedited' -Type 'DWord' -Value 0 -Description 'Restart as soon as possible (even during active hours) to finish updating'
@@ -2793,25 +2788,12 @@ Windows Registry Editor Version 5.00
         Set-RegistryValue -Path $winlogon -Name 'AutoAdminLogon' -Type 'String' -Value '1' -Description 'Enable automatic logon for the built-in Administrator account'
         Set-RegistryValue -Path $winlogon -Name 'DefaultUserName' -Type 'String' -Value 'Administrator' -Description 'Set automatic logon user to Administrator'
         Set-RegistryValue -Path $winlogon -Name 'DefaultPassword' -Type 'String' -Value '' -Description 'Use a blank password for automatic logon'
-        Set-RegistryValue -Path $winlogon -Name 'ForceAutoLogon' -Type 'String' -Value '1' -Description 'Keep automatic logon enabled after sign-out'
 
         Set-RegistryValue -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' -Name 'LimitBlankPasswordUse' -Type 'DWord' -Value 0 -Description 'Allow blank-password local accounts to log on remotely in the lab network'
         Set-RegistryValue -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name 'fDenyTSConnections' -Type 'DWord' -Value 0 -Description 'Enable Remote Desktop connections'
 
         Set-Service -Name TermService -StartupType Automatic
         Start-Service -Name TermService -ErrorAction SilentlyContinue
-        Set-Service -Name sshd -StartupType Automatic
-        Start-Service -Name sshd
-
-        $sshdConfigPath = Join-Path $env:ProgramData 'ssh\sshd_config'
-        $sshdConfig = Get-Content -LiteralPath $sshdConfigPath -Raw
-        $sshdConfig = $sshdConfig -replace '(?m)^#?\s*PermitEmptyPasswords\s+\S+\s*$', 'PermitEmptyPasswords yes'
-        if ($sshdConfig -notmatch '(?m)^PermitEmptyPasswords yes$') {
-            throw "Failed to enable empty-password SSH authentication in $sshdConfigPath"
-        }
-        Set-Content -LiteralPath $sshdConfigPath -Value $sshdConfig -Encoding Ascii
-        Restart-Service -Name sshd
-
         Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
 
         dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart | Out-Null

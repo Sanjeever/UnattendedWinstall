@@ -60,13 +60,14 @@ VK7JG-NPHTM-C97JM-9MPGT-3V66T
 ### 远程访问
 
 - 开启 RDP。
+- 允许锁定工作站，避免自动登录抢占 RDP 会话。
 - 允许空密码本地账户通过 RDP 登录：
 
 ```text
 LimitBlankPasswordUse = 0
 ```
 
-- 在安装阶段联网安装 Windows OpenSSH Server。
+- 在首次登录阶段联网安装 Windows OpenSSH Server。
 - 将 `sshd` 服务设置为自动启动并立即启动。
 - 开启 SSH 空密码认证，以便使用内置 `Administrator` 直接连接。
 - 关闭 Domain / Private / Public 三类 Windows 防火墙配置。
@@ -81,25 +82,42 @@ ssh Administrator@机器IP
 
 出现密码提示时直接按回车。
 
-OpenSSH Server 是 Windows Feature on Demand，安装过程中需要能够访问 Windows Update。配置会在临时禁用网卡之前安装该组件；如果安装环境不能联网，OpenSSH Server 安装会失败。
+OpenSSH Server 是 Windows Feature on Demand，配置会在 OOBE 完成、网卡恢复后通过 Windows Update 安装该组件。
+
+#### 无网安装与 Wi-Fi 场景
+
+如果首次登录时没有可用网络，例如进入桌面后才人工连接 Wi-Fi，OpenSSH Server 安装会失败且不会自动重试。此时 RDP 配置仍会生效，但只有连接 Wi-Fi 并获得 IP 地址后才能从其他机器访问；SSH 因为没有安装 `sshd`，连接会提示端口 22 被拒绝。
+
+人工连接 Wi-Fi 后，在管理员 PowerShell 中执行：
+
+```powershell
+Add-WindowsCapability -Online -Name 'OpenSSH.Server~~~~0.0.1.0'
+
+Set-Service sshd -StartupType Automatic
+Start-Service sshd
+
+$configPath = "$env:ProgramData\ssh\sshd_config"
+(Get-Content -LiteralPath $configPath) `
+    -replace '^\s*#?\s*PermitEmptyPasswords\s+\S+\s*$', 'PermitEmptyPasswords yes' |
+    Set-Content -LiteralPath $configPath -Encoding Ascii
+
+& "$env:WINDIR\System32\OpenSSH\sshd.exe" -t
+Restart-Service sshd
+```
+
+`sshd.exe -t` 没有输出表示配置语法正确。完成后可用下面的命令确认安装状态：
+
+```powershell
+Get-WindowsCapability -Online -Name 'OpenSSH.Server*' | Select-Object Name, State
+Get-Service sshd | Select-Object Name, Status, StartType
+Get-NetTCPConnection -LocalPort 22 -State Listen
+```
 
 ### Windows 更新
 
-- 关闭 Windows 自动更新策略：
-
-```text
-NoAutoUpdate = 1
-```
-
-- 禁用 Windows Update 相关服务：
-  - `wuauserv`
-  - `UsoSvc`
-  - `WaaSMedicSvc`
-  - `DoSvc`
-
-这样安装完成后，系统不会自动扫描、下载和安装 Windows 更新，也不会通过 Delivery Optimization 下载或共享更新内容。
-
-如果后续需要手动打补丁，需要先恢复这些服务和更新策略。
+- 保持 Windows Update 及其相关服务可用。
+- 不设置 `NoAutoUpdate` 禁用策略。
+- Windows 可正常获取 OpenSSH Server 等 Features on Demand，并继续扫描、下载和安装系统更新。
 
 ### WSL2 与 Hyper-V
 
@@ -205,7 +223,7 @@ Retail
 - Windows 防火墙已关闭。
 - WSL2 / VirtualMachinePlatform / Hyper-V Windows 功能已启用。
 - Edge 已保留。
-- Windows 自动更新已关闭。
+- Windows Update 保持可用。
 
 ## 安装后验证
 
@@ -220,11 +238,7 @@ Get-NetFirewallProfile | Select-Object Name, Enabled
 Get-WindowsCapability -Online -Name 'OpenSSH.Server*' | Select-Object Name, State
 Get-Service sshd | Select-Object Name, Status, StartType
 Select-String -Path "$env:ProgramData\ssh\sshd_config" -Pattern '^PermitEmptyPasswords yes$'
-(Get-ItemProperty 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU').NoAutoUpdate
-'wuauserv','UsoSvc','WaaSMedicSvc','DoSvc' | ForEach-Object {
-    $service = $_
-    Get-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Services\$service" | Select-Object @{Name='ServiceName';Expression={$service}}, Start
-}
+Get-Service wuauserv,UsoSvc,WaaSMedicSvc,DoSvc | Select-Object Name, Status, StartType
 'Microsoft-Windows-Subsystem-Linux','VirtualMachinePlatform','Microsoft-Hyper-V-All' | ForEach-Object {
     Get-WindowsOptionalFeature -Online -FeatureName $_ | Select-Object FeatureName, State
 }
@@ -237,11 +251,10 @@ Select-String -Path "$env:ProgramData\ssh\sshd_config" -Pattern '^PermitEmptyPas
 - `LimitBlankPasswordUse` 为 `0`。
 - `fDenyTSConnections` 为 `0`。
 - 防火墙 profile 的 `Enabled` 均为 `False`。
-- OpenSSH Server capability 为 `Installed`。
-- `sshd` 服务的状态为 `Running`，启动类型为 `Automatic`。
-- `sshd_config` 包含 `PermitEmptyPasswords yes`。
-- `NoAutoUpdate` 为 `1`。
-- `wuauserv`、`UsoSvc`、`WaaSMedicSvc`、`DoSvc` 的 `Start` 均为 `4`。
+- 如果首次登录时可以访问 Windows Update，或已在连接 Wi-Fi 后手工安装，OpenSSH Server capability 为 `Installed`。
+- 在 OpenSSH Server 安装成功的前提下，`sshd` 服务的状态为 `Running`，启动类型为 `Automatic`。
+- 在 OpenSSH Server 安装成功的前提下，`sshd_config` 包含 `PermitEmptyPasswords yes`。
+- `wuauserv`、`UsoSvc`、`WaaSMedicSvc`、`DoSvc` 均未被禁用。
 - WSL2 / VirtualMachinePlatform / Hyper-V 均为 `Enabled`。
 
 ## Docker Desktop
