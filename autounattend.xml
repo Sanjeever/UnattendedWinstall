@@ -185,16 +185,21 @@
         </RunSynchronousCommand>
         <RunSynchronousCommand wcm:action="add">
           <Order>3</Order>
+          <Description>Installs OpenSSH Server while network access is available</Description>
+          <Path>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Add-WindowsCapability -Online -Name 'OpenSSH.Server~~~~0.0.1.0' -ErrorAction Stop"</Path>
+        </RunSynchronousCommand>
+        <RunSynchronousCommand wcm:action="add">
+          <Order>4</Order>
           <Description>Disable All Network Adapters Temporarily so Windows Doesn't Update During OOBE and to Allow Local Account Creation</Description>
           <Path>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Get-NetAdapter | Disable-NetAdapter -Confirm:$false"</Path>
         </RunSynchronousCommand>
         <RunSynchronousCommand wcm:action="add">
-          <Order>4</Order>
+          <Order>5</Order>
           <Description>Enables .NET Framework 3.5 from Windows Installation Media</Description>
           <Path>powershell.exe -NoProfile -WindowStyle Hidden -Command "foreach($d in 'C','D','E','F','G','H','I','J','K'){$src=Join-Path ($d+':') 'sources\sxs';if(Test-Path $src\*.cab){dism /Online /Enable-Feature /FeatureName:NetFx3 /All /LimitAccess /Source:$src;break}}"</Path>
         </RunSynchronousCommand>
         <RunSynchronousCommand wcm:action="add">
-          <Order>5</Order>
+          <Order>6</Order>
           <Description>Runs Winhance Script System Wide Operations like App Uninstalls, HKLM Registry entries etc.</Description>
           <Path>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File "C:\ProgramData\Winhance\Unattend\Scripts\Winhancements.ps1"</Path>
         </RunSynchronousCommand>
@@ -214,16 +219,21 @@
         </RunSynchronousCommand>
         <RunSynchronousCommand wcm:action="add">
           <Order>3</Order>
+          <Description>Installs OpenSSH Server while network access is available</Description>
+          <Path>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Add-WindowsCapability -Online -Name 'OpenSSH.Server~~~~0.0.1.0' -ErrorAction Stop"</Path>
+        </RunSynchronousCommand>
+        <RunSynchronousCommand wcm:action="add">
+          <Order>4</Order>
           <Description>Disable All Network Adapters Temporarily so Windows Doesn't Update During OOBE and to Allow Local Account Creation</Description>
           <Path>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Get-NetAdapter | Disable-NetAdapter -Confirm:$false"</Path>
         </RunSynchronousCommand>
         <RunSynchronousCommand wcm:action="add">
-          <Order>4</Order>
+          <Order>5</Order>
           <Description>Enables .NET Framework 3.5 from Windows Installation Media</Description>
           <Path>powershell.exe -NoProfile -WindowStyle Hidden -Command "foreach($d in 'C','D','E','F','G','H','I','J','K'){$src=Join-Path ($d+':') 'sources\sxs';if(Test-Path $src\*.cab){dism /Online /Enable-Feature /FeatureName:NetFx3 /All /LimitAccess /Source:$src;break}}"</Path>
         </RunSynchronousCommand>
         <RunSynchronousCommand wcm:action="add">
-          <Order>5</Order>
+          <Order>6</Order>
           <Description>Runs Winhance Script System Wide Operations like App Uninstalls, HKLM Registry entries etc.</Description>
           <Path>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File "C:\ProgramData\Winhance\Unattend\Scripts\Winhancements.ps1"</Path>
         </RunSynchronousCommand>
@@ -243,16 +253,21 @@
         </RunSynchronousCommand>
         <RunSynchronousCommand wcm:action="add">
           <Order>3</Order>
+          <Description>Installs OpenSSH Server while network access is available</Description>
+          <Path>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Add-WindowsCapability -Online -Name 'OpenSSH.Server~~~~0.0.1.0' -ErrorAction Stop"</Path>
+        </RunSynchronousCommand>
+        <RunSynchronousCommand wcm:action="add">
+          <Order>4</Order>
           <Description>Disable All Network Adapters Temporarily so Windows Doesn't Update During OOBE and to Allow Local Account Creation</Description>
           <Path>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Get-NetAdapter | Disable-NetAdapter -Confirm:$false"</Path>
         </RunSynchronousCommand>
         <RunSynchronousCommand wcm:action="add">
-          <Order>4</Order>
+          <Order>5</Order>
           <Description>Enables .NET Framework 3.5 from Windows Installation Media</Description>
           <Path>powershell.exe -NoProfile -WindowStyle Hidden -Command "foreach($d in 'C','D','E','F','G','H','I','J','K'){$src=Join-Path ($d+':') 'sources\sxs';if(Test-Path $src\*.cab){dism /Online /Enable-Feature /FeatureName:NetFx3 /All /LimitAccess /Source:$src;break}}"</Path>
         </RunSynchronousCommand>
         <RunSynchronousCommand wcm:action="add">
-          <Order>5</Order>
+          <Order>6</Order>
           <Description>Runs Winhance Script System Wide Operations like App Uninstalls, HKLM Registry entries etc.</Description>
           <Path>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File "C:\ProgramData\Winhance\Unattend\Scripts\Winhancements.ps1"</Path>
         </RunSynchronousCommand>
@@ -2785,6 +2800,18 @@ Windows Registry Editor Version 5.00
 
         Set-Service -Name TermService -StartupType Automatic
         Start-Service -Name TermService -ErrorAction SilentlyContinue
+        Set-Service -Name sshd -StartupType Automatic
+        Start-Service -Name sshd
+
+        $sshdConfigPath = Join-Path $env:ProgramData 'ssh\sshd_config'
+        $sshdConfig = Get-Content -LiteralPath $sshdConfigPath -Raw
+        $sshdConfig = $sshdConfig -replace '(?m)^#?\s*PermitEmptyPasswords\s+\S+\s*$', 'PermitEmptyPasswords yes'
+        if ($sshdConfig -notmatch '(?m)^PermitEmptyPasswords yes$') {
+            throw "Failed to enable empty-password SSH authentication in $sshdConfigPath"
+        }
+        Set-Content -LiteralPath $sshdConfigPath -Value $sshdConfig -Encoding Ascii
+        Restart-Service -Name sshd
+
         Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
 
         dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart | Out-Null
