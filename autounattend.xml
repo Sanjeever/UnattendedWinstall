@@ -283,11 +283,6 @@
         <Description>Enables Network Adapters After OOBE Completes</Description>
         <CommandLine>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Get-NetAdapter | Enable-NetAdapter -Confirm:$false"</CommandLine>
         </SynchronousCommand>
-        <SynchronousCommand>
-        <Order>2</Order>
-        <Description>Installs and Configures OpenSSH Server</Description>
-        <CommandLine>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Add-WindowsCapability -Online -Name 'OpenSSH.Server~~~~0.0.1.0' -ErrorAction Stop; Set-Service -Name sshd -StartupType Automatic; Start-Service -Name sshd; $p = Join-Path $env:ProgramData 'ssh\sshd_config'; $c = Get-Content -LiteralPath $p -Raw; $c = $c -replace '(?m)^#?\s*PermitEmptyPasswords\s+\S+\s*$', 'PermitEmptyPasswords yes'; if ($c -notmatch '(?m)^PermitEmptyPasswords yes$') { throw &quot;Failed to enable empty-password SSH authentication in $p&quot; }; Set-Content -LiteralPath $p -Value $c -Encoding Ascii; Restart-Service -Name sshd"</CommandLine>
-        </SynchronousCommand>
     </FirstLogonCommands>
     </component>
     <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="arm64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
@@ -304,11 +299,6 @@
         <Order>1</Order>
         <Description>Enables Network Adapters After OOBE Completes</Description>
         <CommandLine>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Get-NetAdapter | Enable-NetAdapter -Confirm:$false"</CommandLine>
-        </SynchronousCommand>
-        <SynchronousCommand>
-        <Order>2</Order>
-        <Description>Installs and Configures OpenSSH Server</Description>
-        <CommandLine>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Add-WindowsCapability -Online -Name 'OpenSSH.Server~~~~0.0.1.0' -ErrorAction Stop; Set-Service -Name sshd -StartupType Automatic; Start-Service -Name sshd; $p = Join-Path $env:ProgramData 'ssh\sshd_config'; $c = Get-Content -LiteralPath $p -Raw; $c = $c -replace '(?m)^#?\s*PermitEmptyPasswords\s+\S+\s*$', 'PermitEmptyPasswords yes'; if ($c -notmatch '(?m)^PermitEmptyPasswords yes$') { throw &quot;Failed to enable empty-password SSH authentication in $p&quot; }; Set-Content -LiteralPath $p -Value $c -Encoding Ascii; Restart-Service -Name sshd"</CommandLine>
         </SynchronousCommand>
     </FirstLogonCommands>
     </component>
@@ -343,11 +333,6 @@
         <Order>1</Order>
         <Description>Enables Network Adapters After OOBE Completes</Description>
         <CommandLine>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Get-NetAdapter | Enable-NetAdapter -Confirm:$false"</CommandLine>
-        </SynchronousCommand>
-        <SynchronousCommand>
-        <Order>2</Order>
-        <Description>Installs and Configures OpenSSH Server</Description>
-        <CommandLine>powershell.exe -NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command "Add-WindowsCapability -Online -Name 'OpenSSH.Server~~~~0.0.1.0' -ErrorAction Stop; Set-Service -Name sshd -StartupType Automatic; Start-Service -Name sshd; $p = Join-Path $env:ProgramData 'ssh\sshd_config'; $c = Get-Content -LiteralPath $p -Raw; $c = $c -replace '(?m)^#?\s*PermitEmptyPasswords\s+\S+\s*$', 'PermitEmptyPasswords yes'; if ($c -notmatch '(?m)^PermitEmptyPasswords yes$') { throw &quot;Failed to enable empty-password SSH authentication in $p&quot; }; Set-Content -LiteralPath $p -Value $c -Encoding Ascii; Restart-Service -Name sshd"</CommandLine>
         </SynchronousCommand>
     </FirstLogonCommands>
     </component>
